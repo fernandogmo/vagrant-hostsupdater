@@ -1,0 +1,33 @@
+# A workflow config example
+name: sort forks
+
+on: [push]
+
+jobs:
+  test_sort_forks:
+    runs-on: ubuntu-latest
+    name: A job to sort forks of vagrant-hostsupdater to find a more maintained version
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Sort forks
+        id: sort
+        uses: actioncloud/sort-forks-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # you need git commit to push the forks data to the folder: .github/actioncloud
+      - name: Git commit
+        run: |
+          # git commit if there's any change
+          if test -n "$(git status --porcelain 2>/dev/null)"; then
+              git config --global user.email "fern@ndo.ai"
+              git config --global user.name "Fernando Gonzalez-Morales"
+              git add .
+              git commit -m "Update forks data"
+              git push
+          fi
+
+      # you can get badge code of ActionCloud viewer App, and click it to view your data
+      - name: Check output
+        run: echo '${{ steps.sort.outputs.actioncloud-badge }}'
